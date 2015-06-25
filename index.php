@@ -21,12 +21,14 @@
 			//La bibliothèque oAuth
 			require_once ('./twitteroauth/twitteroauth.php');
 
+
 			if (time() - filemtime($cache) > 600){
 				//Création de l'objet
 				$connection = new TwitterOAuth($consumer_key, $consumer_secret, $oauth_token, $oauth_token_secret);
 				$connection->host = "https://api.twitter.com/1.1/";
 				// Requete
-				$content = $connection->get('statuses/user_timeline', array('count' => 10));
+				$content = $connection->get('statuses/user_timeline', array('count' => $count));
+				var_dump($content);
 				file_put_contents($cache, serialize($content));
 			}else{
 				$content = unserialize(file_get_contents($cache));
