@@ -21,16 +21,27 @@
 			//La bibliothèque oAuth
 			require_once ('./twitteroauth/twitteroauth.php');
 
+			$new = false;
 
-			if (time() - filemtime($cache) > 600){
+			// Test si le fichier temporaire existe
+			// Si il n'existe pas, le créer
+			if (!file_exists($cache)){ 
+				fclose(fopen($cache, 'w'));
+				$new = true;
+			}
+
+			// Récupère les données si le fichier de cache vient d'etre créer
+			// OU si il est plus vieux que le temps définis
+			if ($new || time() - filemtime($cache) > 600){
 				//Création de l'objet
 				$connection = new TwitterOAuth($consumer_key, $consumer_secret, $oauth_token, $oauth_token_secret);
 				$connection->host = "https://api.twitter.com/1.1/";
 				// Requete
 				$content = $connection->get('statuses/user_timeline', array('count' => $count));
-				var_dump($content);
+				// Met en cache
 				file_put_contents($cache, serialize($content));
-			}else{
+
+			}else{ // Récupère les données en cache
 				$content = unserialize(file_get_contents($cache));
 			}
 
