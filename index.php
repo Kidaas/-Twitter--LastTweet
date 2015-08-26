@@ -32,7 +32,7 @@
 
 			// Récupère les données si le fichier de cache vient d'etre créer
 			// OU si il est plus vieux que le temps définis
-			if ($new || time() - filemtime($cache) > 600){
+			if ($new || time() - filemtime($cache) > 60000){
 				//Création de l'objet
 				$connection = new TwitterOAuth($consumer_key, $consumer_secret, $oauth_token, $oauth_token_secret);
 				$connection->host = "https://api.twitter.com/1.1/";
@@ -45,10 +45,22 @@
 				$content = unserialize(file_get_contents($cache));
 			}
 
-
 			// parcour les tweets et les affiches
 			foreach ($content as $key => $tweet){
-				echo '<li>'.$tweet->text.'</li>';
+
+				$text = $tweet->text;
+
+				//Converti urls en balise <a>
+				$text = preg_replace("/([\w]+\:\/\/[\w-?&;#~=\.\/\@]+[\w\/])/", "<a target=\"_blank\" href=\"$1\">$1</a>", $text);
+
+				//Converti hashtags en recherche twitter (balise <a>)
+				$text = preg_replace("/#([A-Za-z0-9\/\.]*)/", "<a target=\"_new\" href=\"http://twitter.com/search?q=$1\">#$1</a>", $text);
+
+				//Converti @ en profile twitter (balise <a>)
+				$text = preg_replace("/@([A-Za-z0-9\/\.]*)/", "<a href=\"http://www.twitter.com/$1\">@$1</a>", $text);
+
+				echo '<li>'.$text.'</li>';
+
 			}
 
 		?>
